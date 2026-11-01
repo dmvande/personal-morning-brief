@@ -118,10 +118,12 @@ def _clock(iso):
     return dt.datetime.fromisoformat(iso).strftime("%-I:%M %p").lower()
 
 
-def forecast(loc):
+def forecast(loc, start=None):
     q = urllib.parse.urlencode({
         "latitude": loc["latitude"], "longitude": loc["longitude"],
-        "timezone": loc.get("timezone", "auto"), "forecast_days": 14,
+        "timezone": loc.get("timezone", "auto"),
+        **({"start_date": start.isoformat(), "end_date": (start + dt.timedelta(days=13)).isoformat()}
+           if start else {"forecast_days": 14}),
         "temperature_unit": "fahrenheit", "wind_speed_unit": "mph",
         "precipitation_unit": "inch",
         "daily": ",".join(["weather_code", "temperature_2m_max", "temperature_2m_min",
@@ -144,7 +146,7 @@ def forecast(loc):
     return {"location": loc["name"], "days": days}
 
 
-def forecast_nws(loc):
+def forecast_nws(loc, start=None):
     """Fallback: US National Weather Service (7 days, US locations only)."""
     pt = _get_json(f"https://api.weather.gov/points/{loc['latitude']:.4f},{loc['longitude']:.4f}")
     periods = _get_json(pt["properties"]["forecast"])["properties"]["periods"]
@@ -165,24 +167,25 @@ def forecast_nws(loc):
         else:
             d["low"] = per["temperature"]
             d["summary"] = d["summary"] or per["shortForecast"]
-    return {"location": loc["name"], "days": list(days.values()),
+    kept = [x for x in days.values() if not start or x["date"] >= start.isoformat()]
+    return {"location": loc["name"], "days": kept,
             "note": "14-day source unavailable this morning; showing the 7-day National Weather Service forecast."}
 
 
-def forecast_any(loc):
+def forecast_any(loc, start=None):
     try:
-        return forecast(loc)
+        return forecast(loc, start)
     except Exception:
         if loc.get("country_code", "US") == "US":
-            return forecast_nws(loc)
+            return forecast_nws(loc, start)
         raise
 
 
 def weather(d: dt.date):
-    out = [forecast_any(BOSTON)]
+    out = [forecast_any(BOSTON, d)]
     t = travel_location(d)
     if t:
-        out.append(forecast_any(t))
+        out.append(forecast_any(t, d))
     return out
 
 
