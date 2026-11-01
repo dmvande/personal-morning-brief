@@ -8,7 +8,7 @@ US Eastern and send the email to **dvslice@gmail.com**.
 | Item | Rule |
 |---|---|
 | Date | Today in America/New_York |
-| Daily Office source | https://dailyofficeforall.com. Morning Prayer for the date, with settings: **30-day psalter**, **Regular** version, **praying by myself**, **traditional** Lord's Prayer |
+| Daily Office source | https://dailyofficeforall.com (ACNA 2019 Prayer Book). Settings: **30-day psalter**, **regular** version, **praying by myself**, **traditional** Lord's Prayer. The site gives references; the text comes from Bible Gateway in the version the site links to (ESV) |
 | Psalms | 30-day psalter. **Odd-numbered months** (Jan, Mar, May, Jul, Sep, Nov): use the **Evening** psalms for that day. Even months: Morning psalms |
 | OT and NT lessons | **Odd-numbered years** (2027, 2029…): use the **Evening** Prayer OT and NT lessons for that day. Even years: Morning lessons |
 | Proverbs | Chapter = day of the month (1–31), **NIV**, full text |
@@ -17,29 +17,28 @@ US Eastern and send the email to **dvslice@gmail.com**.
 
 ## Steps
 
-1. `python3 brief.py plan > /tmp/plan.json` and read it.
-2. **Daily Office.** Open dailyofficeforall.com for the date with the settings above.
-   Fetch Morning Prayer, and Evening Prayer as well if the plan needs it for psalms
-   or lessons. Capture the psalm references and text, the OT and NT lesson
-   references and text, the day's title (feast or season), and the traditional
-   Lord's Prayer. Also include the gospel reading if the office lists a third
-   lesson. If the site shows special readings for a feast, use the ones it gives
-   for the chosen office and say so in `note`.
-3. **Proverbs.** Fetch the NIV chapter from
-   `https://www.biblegateway.com/passage/?search=Proverbs+N&version=NIV`.
-   Keep the verse numbers and leave out the footnotes.
-4. **Murray.** Read `murray/lesson-NN.md`. If it's missing, fetch the lesson
-   from https://www.ccel.org/ccel/murray/prayer (or Project Gutenberg), write a
-   faithful summary of about 200 words, save it to that file, and commit and push it.
-5. `python3 brief.py weather > /tmp/weather.json`
-6. Build `/tmp/content.json` with keys `plan`, `office` (`day_title`, `note`, `url`,
-   `readings: [{label, reference, text}]`, `lords_prayer`), `proverbs` (`text`, `url`),
-   `murray` (`title`, `summary`) and `weather` (from step 5). Then run
-   `python3 brief.py render /tmp/content.json > /tmp/brief.html`.
-7. Send it with Gmail `send_message` to dvslice@gmail.com, with subject
-   `Morning Reading: <Weekday, Month D>`, `htmlBody` set to the rendered HTML, and a
-   short plain-text `body`.
-8. If any source fails, still send the email: include what you have, add a
+1. `pip install beautifulsoup4` if it's missing. Playwright and Chromium are
+   pre-installed; don't reinstall them.
+2. **Murray.** Check `murray/lesson-NN.md` (NN = day of month, zero-padded). If it's
+   missing, download https://ccel.org/ccel/m/murray/prayer/cache/prayer.txt, read
+   that lesson in full (headed e.g. "TWELFTH LESSON."), and write about 200 words
+   on its main points. The first line is `Title: <lesson title> (<scripture ref>)`,
+   followed by one short paragraph per main point, matching `murray/lesson-01.md`.
+   Commit and push it.
+3. `python3 build.py --out /tmp/brief`. This:
+   - renders dailyofficeforall.com in headless Chromium (`office.js`) with the
+     settings above, picking the Morning or Evening office as the rules require
+     for psalms and for lessons, and captures the day's title and the
+     traditional Lord's Prayer
+   - fetches each psalm and lesson from Bible Gateway in the version the site
+     links to (ESV, or NRSV for Apocrypha), plus Proverbs in the NIV (`scripture.py`)
+   - fetches weather from Open-Meteo, retrying, and falls back to the 7-day NWS
+     forecast if needed (`brief.py`)
+   - writes `/tmp/brief/content.json` and `/tmp/brief/brief.html`
+4. Send `/tmp/brief/brief.html` with Gmail `send_message` to dvslice@gmail.com.
+   Subject: `Morning Reading: <Weekday, Month D>`. Put the HTML file's contents in
+   `htmlBody`, plus a short plain-text `body`.
+5. If any step fails, still send the email: include what you have, add a
    link for each missing section, and put a line at the top saying what failed.
    Never invent scripture text.
 

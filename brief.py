@@ -12,6 +12,7 @@ import datetime as dt
 import html
 import json
 import os
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -64,9 +65,17 @@ def plan(d: dt.date) -> dict:
     }
 
 
-def _get_json(url):
-    with urllib.request.urlopen(url, timeout=30) as r:
-        return json.load(r)
+def _get_json(url, tries=6):
+    import time
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "personal-morning-brief"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r)
+        except Exception as e:  # rate limits (429) and timeouts are common
+            if i == tries - 1:
+                raise
+            time.sleep(min(60, 5 * 2 ** i))
 
 
 def geocode(name):
@@ -105,6 +114,10 @@ def travel_location(d: dt.date):
     return g
 
 
+def _clock(iso):
+    return dt.datetime.fromisoformat(iso).strftime("%-I:%M %p").lower()
+
+
 def forecast(loc):
     q = urllib.parse.urlencode({
         "latitude": loc["latitude"], "longitude": loc["longitude"],
@@ -126,16 +139,50 @@ def forecast(loc):
             "precip_chance": data["precipitation_probability_max"][i],
             "precip_in": data["precipitation_sum"][i],
             "wind_mph": round(data["wind_speed_10m_max"][i]),
-            "sunrise": data["sunrise"][i][-5:], "sunset": data["sunset"][i][-5:],
+            "sunrise": _clock(data["sunrise"][i]), "sunset": _clock(data["sunset"][i]),
         })
     return {"location": loc["name"], "days": days}
 
 
+def forecast_nws(loc):
+    """Fallback: US National Weather Service (7 days, US locations only)."""
+    pt = _get_json(f"https://api.weather.gov/points/{loc['latitude']:.4f},{loc['longitude']:.4f}")
+    periods = _get_json(pt["properties"]["forecast"])["properties"]["periods"]
+    days = {}
+    for per in periods:
+        date = per["startTime"][:10]
+        d = days.setdefault(date, {"date": date, "summary": None, "high": None, "low": None,
+                                   "precip_chance": None, "precip_in": None, "wind_mph": None,
+                                   "sunrise": "—", "sunset": "—"})
+        pc = (per.get("probabilityOfPrecipitation") or {}).get("value")
+        if pc is not None:
+            d["precip_chance"] = max(pc, d["precip_chance"] or 0)
+        wind = [int(x) for x in re.findall(r"\d+", per.get("windSpeed", ""))]
+        if wind:
+            d["wind_mph"] = max(max(wind), d["wind_mph"] or 0)
+        if per["isDaytime"]:
+            d["high"], d["summary"] = per["temperature"], per["shortForecast"]
+        else:
+            d["low"] = per["temperature"]
+            d["summary"] = d["summary"] or per["shortForecast"]
+    return {"location": loc["name"], "days": list(days.values()),
+            "note": "14-day source unavailable this morning; showing the 7-day National Weather Service forecast."}
+
+
+def forecast_any(loc):
+    try:
+        return forecast(loc)
+    except Exception:
+        if loc.get("country_code", "US") == "US":
+            return forecast_nws(loc)
+        raise
+
+
 def weather(d: dt.date):
-    out = [forecast(BOSTON)]
+    out = [forecast_any(BOSTON)]
     t = travel_location(d)
     if t:
-        out.append(forecast(t))
+        out.append(forecast_any(t))
     return out
 
 
@@ -165,28 +212,42 @@ def esc(s):
 
 
 def paragraphs(text):
-    return "".join(f"<p>{esc(p.strip())}</p>" for p in str(text).split("\n\n") if p.strip())
+    out = []
+    for para in str(text).split("\n\n"):
+        if para.strip():
+            h = esc(para.strip()).replace("\n", "<br>")
+            h = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", h)
+            h = re.sub(r"\[\[(\d+)\]\]\s*", r"<sup>\1</sup>", h)
+            out.append(f"<p>{h}</p>")
+    return "".join(out)
 
 
 def render_reading(r):
-    out = f"<h3>{esc(r.get('label',''))}: {esc(r.get('reference',''))}</h3>"
+    ref = esc(r.get('reference', ''))
+    if r.get("url"):
+        ref = f"<a href='{esc(r['url'])}'>{ref}</a>"
+    out = f"<h3>{esc(r.get('label',''))}: {ref}</h3>"
     if r.get("text"):
         out += f"<div class='verse'>{paragraphs(r['text'])}</div>"
     return out
 
 
 def render_weather(w):
+    def v(x, suffix=""):
+        return "—" if x is None else f"{x}{suffix}"
     d0 = w["days"][0]
     rows = "".join(
         f"<tr><td>{dt.date.fromisoformat(x['date']).strftime('%a %-m/%-d')}</td>"
-        f"<td>{esc(x['summary'])}</td><td>{x['high']}° / {x['low']}°</td>"
-        f"<td>{x['precip_chance'] if x['precip_chance'] is not None else '—'}%</td>"
-        f"<td>{x['wind_mph']} mph</td></tr>" for x in w["days"])
-    return (f"<div class='card'><h2>Weather: {esc(w['location'])}</h2>"
-            f"<div class='today'><b>Today:</b> {esc(d0['summary'])}, high {d0['high']}°F, "
-            f"low {d0['low']}°F, {d0['precip_chance']}% chance of precipitation "
-            f"({d0['precip_in']} in), wind up to {d0['wind_mph']} mph. "
-            f"Sunrise {d0['sunrise']}, sunset {d0['sunset']}.</div>"
+        f"<td>{esc(x['summary'])}</td><td>{v(x['high'], '°')} / {v(x['low'], '°')}</td>"
+        f"<td>{v(x['precip_chance'], '%')}</td>"
+        f"<td>{v(x['wind_mph'], ' mph')}</td></tr>" for x in w["days"])
+    note = f"<div class='meta'>{esc(w['note'])}</div>" if w.get("note") else ""
+    return (f"<div class='card'><h2>Weather: {esc(w['location'])}</h2>{note}"
+            f"<div class='today'><b>Today:</b> {esc(d0['summary'])}, high {v(d0['high'], '°F')}, "
+            f"low {v(d0['low'], '°F')}, {v(d0['precip_chance'], '%')} chance of precipitation"
+            f"{'' if d0['precip_in'] is None else ' (' + str(d0['precip_in']) + ' in)'}, "
+            f"wind up to {v(d0['wind_mph'], ' mph')}."
+            f"{'' if d0['sunrise'] == '—' else ' Sunrise ' + d0['sunrise'] + ', sunset ' + d0['sunset'] + '.'}</div>"
             f"<table><tr><th>Day</th><th>Conditions</th><th>Hi / Lo</th><th>Precip</th><th>Wind</th></tr>"
             f"{rows}</table></div>")
 
