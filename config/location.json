@@ -1,0 +1,4 @@
+{
+  "_comment": "Travel location. Leave current as null when home in Massachusetts. Example: {\"name\": \"Denver, Colorado\", \"from\": \"2026-11-05\", \"until\": \"2026-11-10\"}",
+  "current": null
+}
