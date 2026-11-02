@@ -17,8 +17,8 @@ US Eastern and send the email to **dvslice@gmail.com**.
 
 ## Steps
 
-1. `pip install beautifulsoup4` if it's missing. Playwright and Chromium are
-   pre-installed; don't reinstall them.
+1. Nothing needs installing: the Python scripts use only the standard library,
+   and Playwright and Chromium are pre-installed (don't reinstall them).
 2. **Murray.** All 31 summaries are pre-written in `murray/lesson-01.md` …
    `lesson-31.md`. Use them as they are; don't rewrite them. (Only if a file is
    ever missing: summarize that lesson from
