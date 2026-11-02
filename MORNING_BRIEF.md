@@ -12,19 +12,18 @@ US Eastern and send the email to **dvslice@gmail.com**.
 | Psalms | 30-day psalter. **Odd-numbered months** (Jan, Mar, May, Jul, Sep, Nov): use the **Evening** psalms for that day. Even months: Morning psalms |
 | OT and NT lessons | **Odd-numbered years** (2027, 2029…): use the **Evening** Prayer OT and NT lessons for that day. Even years: Morning lessons |
 | Proverbs | Chapter = day of the month (1–31), **NIV**, full text |
-| Murray | *With Christ in the School of Prayer*, lesson = day of the month (1–31). About a 200-word summary of the main points, cached in `murray/lesson-NN.md` |
+| Murray | *With Christ in the School of Prayer*, lesson = day of the month (1–31). About a 200-word summary of the main points, pre-written in `murray/lesson-NN.md` |
 | Weather | Boston, MA today plus a 14-day forecast. If `config/location.json` has an active travel location outside Massachusetts, add that location too |
 
 ## Steps
 
 1. `pip install beautifulsoup4` if it's missing. Playwright and Chromium are
    pre-installed; don't reinstall them.
-2. **Murray.** Check `murray/lesson-NN.md` (NN = day of month, zero-padded). If it's
-   missing, download https://ccel.org/ccel/m/murray/prayer/cache/prayer.txt, read
-   that lesson in full (headed e.g. "TWELFTH LESSON."), and write about 200 words
-   on its main points. The first line is `Title: <lesson title> (<scripture ref>)`,
-   followed by one short paragraph per main point, matching `murray/lesson-01.md`.
-   Commit and push it.
+2. **Murray.** All 31 summaries are pre-written in `murray/lesson-01.md` …
+   `lesson-31.md`. Use them as they are; don't rewrite them. (Only if a file is
+   ever missing: summarize that lesson from
+   https://ccel.org/ccel/m/murray/prayer/cache/prayer.txt in the same format,
+   and include it in the email without committing.)
 3. `python3 build.py --out /tmp/brief`. This:
    - renders dailyofficeforall.com in headless Chromium (`office.js`) with the
      settings above, picking the Morning or Evening office as the rules require

@@ -220,6 +220,8 @@ def paragraphs(text):
         if para.strip():
             h = esc(para.strip()).replace("\n", "<br>")
             h = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", h)
+            h = re.sub(r"(?<![\w*])\*(?!\*)(.+?)\*(?![\w*])", r"<i>\1</i>", h)
+            h = re.sub(r"(^|<br>)- ", r"\1&bull; ", h)
             h = re.sub(r"\[\[(\d+)\]\]\s*", r"<sup>\1</sup>", h)
             out.append(f"<p>{h}</p>")
     return "".join(out)
