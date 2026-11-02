@@ -289,6 +289,7 @@ def render(c):
         parts.append("<h3 class='sec'>The Lessons</h3>")
     for r in o.get("readings", []):
         parts.append(render_reading(r))
+    sec("Canticle", L.get("canticle"))
     sec("The Apostles' Creed", L.get("creed"))
     sec("The Lord's Prayer", L.get("lords_prayer") or o.get("lords_prayer"))
     sec("The Suffrages", L.get("suffrages"))
@@ -296,6 +297,8 @@ def render(c):
     sec("Collects for Peace and Grace", L.get("peace_grace"))
     sec("Prayer for Mission", L.get("mission"),
         f"Prayer {L.get('mission_number')} of 3 (rotates daily)" if L.get("mission_number") else "")
+    sec("Petitions, Intercessions, and Thanksgivings",
+        re.sub(r"(?m)^(For )", r"- \1", L.get("petitions") or ""))
     if o.get("url"):
         parts.append(f"<p class='meta'><a href='{esc(o['url'])}'>Open the full office</a></p>")
     parts.append("</div>")

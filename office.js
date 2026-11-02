@@ -61,6 +61,8 @@ const { chromium } = require('playwright');
         suffrages: sectionText('suffrages'), collect: sectionText('collect'),
         peace_grace: sectionText('peace-grace'),
         mission: optText(missionId) + '\n\nAmen.', mission_number: missionId.slice(-1),
+        canticle: sectionText('canticle'),      // the site's default canticle for the day
+        petitions: sectionText('petitions'),
       },
     };
   }, day);
