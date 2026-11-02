@@ -200,6 +200,7 @@ h1{font-size:24px;margin:0 0 4px}
 h2{font-size:18px;margin:0 0 4px;color:#5b3a1e}
 .meta{font-size:13px;color:#7a6f64;margin-bottom:10px;font-family:Helvetica,Arial,sans-serif}
 h3{font-size:15px;margin:16px 0 4px}
+h3.sec{font-size:13px;margin:22px 0 6px;letter-spacing:.08em;text-transform:uppercase;color:#5b3a1e;border-bottom:1px solid #eee;padding-bottom:3px}
 p{line-height:1.55;margin:0 0 10px}
 .verse sup{color:#9a8b7c;font-size:10px;margin-right:2px}
 table{border-collapse:collapse;width:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px}
@@ -263,18 +264,38 @@ def render(c):
     parts = [f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body><div class='wrap'>",
              f"<h1>Morning Reading</h1><div class='sub'>{esc(p['date_long'])}"
              f"{' · ' + esc(o['day_title']) if o.get('day_title') else ''}</div>"]
-    # 1. Daily Office
-    parts.append("<div class='card'><h2>1. The Daily Office</h2>"
-                 f"<div class='meta'>dailyofficeforall.com · 30-day psalter, regular version, "
-                 f"praying by myself, traditional Lord's Prayer · Psalms from "
-                 f"{esc(p['daily_office']['psalms_from'])} Prayer; Old and New Testament from "
-                 f"{esc(p['daily_office']['ot_nt_from'])} Prayer</div>")
+    # 1. Daily Office, in the order of the office
+    L = o.get("liturgy") or {}
+    inv = L.get("invitatory") or {}
+
+    def sec(title, body, sub=""):
+        if body:
+            parts.append(f"<h3 class='sec'>{esc(title)}</h3>"
+                         + (f"<div class='meta'>{esc(sub)}</div>" if sub else "")
+                         + paragraphs(body))
+
+    parts.append("<div class='card'><h2>1. Morning Prayer</h2>"
+                 f"<div class='meta'>dailyofficeforall.com · 30-day psalter · praying by myself · "
+                 f"psalms from {esc(p['daily_office']['psalms_from'])} Prayer, lessons from "
+                 f"{esc(p['daily_office']['ot_nt_from'])} Prayer · readings in the NIV</div>")
     if o.get("note"):
         parts.append(f"<p><i>{esc(o['note'])}</i></p>")
+    sec("Opening Verse", L.get("opening"))
+    sec("Confession of Sin", L.get("confession"))
+    if inv:
+        sec("Invitatory", inv.get("versicles"))
+        sec(inv.get("psalm_title") or "Invitatory Psalm", inv.get("psalm_text"))
+    if o.get("readings"):
+        parts.append("<h3 class='sec'>The Lessons</h3>")
     for r in o.get("readings", []):
         parts.append(render_reading(r))
-    if o.get("lords_prayer"):
-        parts.append(f"<h3>The Lord's Prayer</h3>{paragraphs(o['lords_prayer'])}")
+    sec("The Apostles' Creed", L.get("creed"))
+    sec("The Lord's Prayer", L.get("lords_prayer") or o.get("lords_prayer"))
+    sec("The Suffrages", L.get("suffrages"))
+    sec("The Collect of the Day", L.get("collect"))
+    sec("Collects for Peace and Grace", L.get("peace_grace"))
+    sec("Prayer for Mission", L.get("mission"),
+        f"Prayer {L.get('mission_number')} of 3 (rotates daily)" if L.get("mission_number") else "")
     if o.get("url"):
         parts.append(f"<p class='meta'><a href='{esc(o['url'])}'>Open the full office</a></p>")
     parts.append("</div>")

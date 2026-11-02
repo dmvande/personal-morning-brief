@@ -36,13 +36,14 @@ def main():
     for l in psalm_src["links"]:
         if l["id"] == "psalm-lesson":
             for ps in split_psalms(l["reference"]):
-                t = scripture.fetch(ps, "ESV")
+                t = scripture.fetch(ps, "NIV")
                 readings.append({"label": f"Psalm ({p['daily_office']['psalms_from']}, day {p['daily_office']['psalter_day']})",
-                                 "reference": ps, "text": t["text"], "url": t["url"]})
+                                 "reference": f"{ps} (NIV)", "text": t["text"], "url": t["url"]})
     labels = {"OT": "First Lesson", "NT": "Second Lesson"}
     for l in lesson_src["links"]:
         if l["id"].startswith("lesson-"):
-            ver = "NRSV" if "NRSV" in l["url"] else "ESV"
+            # NIV for all lessons; the NIV has no Apocrypha, so those stay NRSV as the site links them
+            ver = "NRSV" if "NRSV" in l["url"] else "NIV"
             t = scripture.fetch(l["reference"], ver)
             readings.append({"label": f"{labels[l['id'][-2:]]} ({p['daily_office']['ot_nt_from']})",
                              "reference": f"{l['reference']} ({ver})", "text": t["text"], "url": t["url"]})
@@ -57,7 +58,8 @@ def main():
     content = {
         "plan": p,
         "office": {"day_title": day_title, "url": psalm_src["page"], "readings": readings,
-                   "lords_prayer": psalm_src["lords_prayer"]},
+                   "lords_prayer": psalm_src["lords_prayer"],
+                   "liturgy": psalm_src.get("liturgy", {})},
         "proverbs": {"text": pv["text"], "url": pv["url"]},
         "murray": {"title": title, "summary": summary},
         "weather": json.load(open(wfile)) if wfile else brief.weather(brief.parse_date(args)),
