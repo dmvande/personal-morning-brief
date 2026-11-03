@@ -208,7 +208,12 @@ th,td{padding:5px 4px;border-bottom:1px solid #eee;text-align:left}
 th{color:#7a6f64;font-weight:600}
 .today{font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:10px}
 a{color:#5b3a1e}
+.jump{font-family:Helvetica,Arial,sans-serif;font-size:14px;background:#fff;border:1px solid #e7e0d6;border-radius:10px;padding:10px 14px;margin:0 0 16px;line-height:1.7}
+.jump a{font-weight:600;text-decoration:none}
+.top{font-family:Helvetica,Arial,sans-serif;font-size:12px;text-align:right;margin:8px 0 0}
 """
+
+TOP = "<p class='top'><a href='#top'>&uarr; Back to top</a></p>"
 
 
 def esc(s):
@@ -262,8 +267,11 @@ def render(c):
     p = c["plan"]
     o = c["office"]
     parts = [f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body><div class='wrap'>",
-             f"<h1>Morning Reading</h1><div class='sub'>{esc(p['date_long'])}"
-             f"{' · ' + esc(o['day_title']) if o.get('day_title') else ''}</div>"]
+             f"<a name='top' id='top'></a><h1>Morning Reading</h1><div class='sub'>{esc(p['date_long'])}"
+             f"{' · ' + esc(o['day_title']) if o.get('day_title') else ''}</div>",
+             "<div class='jump'>Jump to: <a href='#proverbs'>Proverbs</a> · "
+             "<a href='#murray'>Christ in the School of Prayer</a> · "
+             "<a href='#weather'>Weather</a></div>"]
     # 1. Daily Office, in the order of the office
     L = o.get("liturgy") or {}
     inv = L.get("invitatory") or {}
@@ -301,21 +309,21 @@ def render(c):
         re.sub(r"(?m)^(For )", r"- \1", L.get("petitions") or ""))
     if o.get("url"):
         parts.append(f"<p class='meta'><a href='{esc(o['url'])}'>Open the full office</a></p>")
-    parts.append("</div>")
+    parts.append(f"{TOP}</div>")
     # 2. Proverbs
     pv = c["proverbs"]
-    parts.append(f"<div class='card'><h2>2. Proverbs {p['proverbs']['chapter']} (NIV)</h2>"
+    parts.append(f"<a name='proverbs' id='proverbs'></a><div class='card'><h2>2. Proverbs {p['proverbs']['chapter']} (NIV)</h2>"
                  f"<div class='verse'>{paragraphs(pv['text'])}</div>"
-                 f"{'<p class=meta><a href=' + chr(39) + esc(pv['url']) + chr(39) + '>Read on Bible Gateway</a></p>' if pv.get('url') else ''}</div>")
+                 f"{'<p class=meta><a href=' + chr(39) + esc(pv['url']) + chr(39) + '>Read on Bible Gateway</a></p>' if pv.get('url') else ''}{TOP}</div>")
     # 3. Murray
     m = c["murray"]
-    parts.append(f"<div class='card'><h2>3. With Christ in the School of Prayer: Lesson {p['murray']['lesson']}</h2>"
-                 f"<div class='meta'>{esc(m.get('title',''))}</div>{paragraphs(m['summary'])}</div>")
+    parts.append(f"<a name='murray' id='murray'></a><div class='card'><h2>3. With Christ in the School of Prayer: Lesson {p['murray']['lesson']}</h2>"
+                 f"<div class='meta'>{esc(m.get('title',''))}</div>{paragraphs(m['summary'])}{TOP}</div>")
     # 4. Weather
-    parts.append("<h2 style='margin:20px 0 10px'>4. Weather</h2>")
+    parts.append("<a name='weather' id='weather'></a><h2 style='margin:20px 0 10px'>4. Weather</h2>")
     for w in c["weather"]:
         parts.append(render_weather(w))
-    parts.append("</div></body></html>")
+    parts.append(f"{TOP}</div></body></html>")
     return "".join(parts)
 
 

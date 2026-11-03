@@ -14,6 +14,7 @@ US Eastern and send the email to **dvslice@gmail.com**.
 | Office text printed | Opening verse (always option 1, Philippians 1:2) · Confession of Sin · Invitatory, with **Psalm 95:1–7 (Venite) on even dates and Psalm 100 (Jubilate) on odd dates**, in prayer-book wording · Psalms and lessons (NIV) · Canticle (the site's default for the day) · Apostles' Creed · Lord's Prayer (traditional) · Suffrages · Collect of the Day · Collects for Peace and Grace · Prayer for Mission (rotates 1→2→3 by date) · Petitions, Intercessions, and Thanksgivings list. Not printed: General Thanksgiving, Prayer of St. John Chrysostom, closing benediction |
 | Proverbs | Chapter = day of the month (1–31), **NIV**, full text |
 | Murray | *With Christ in the School of Prayer*, lesson = day of the month (1–31). About a 200-word summary of the main points, pre-written in `murray/lesson-NN.md` |
+| Layout | Under the date: "Jump to" links for Proverbs, Christ in the School of Prayer and Weather; a "Back to top" link ends each section |
 | Weather | Boston, MA today plus a 14-day forecast. If `config/location.json` has an active travel location outside Massachusetts, add that location too |
 
 ## Steps
