@@ -1,13 +1,13 @@
 Title: "Because of his importunity," or, The Boldness of God's Friends (Luke 11:5-8)
 
-The parable of the friend at midnight teaches two lessons: we are to pray for others, and in that intercession bold, persistent asking is right and pleasing to God.
+When the disciples asked to be taught to pray, Jesus added the parable of the friend at midnight. It teaches two lessons: we are to pray for others, and in that intercession bold, persistent asking is right and pleasing to God.
 
-**A picture of intercession.** Love for a needy friend, an honest admission of having nothing, confidence in a rich friend, an unexpected refusal, perseverance that won't take no, and finally "as many as he needeth."
+**A picture of intercession.** The parable traces the whole path: love for a needy friend who has arrived; an honest admission, "I have nothing to set before him"; confidence in a rich friend; an unexpected refusal; perseverance that won't take no; and finally the reward, "as many as he needeth."
 
-**Intercession is prayer's true glory.** Abraham, Moses, Samuel and Elijah showed their power with God in praying for others. When we come to God as friends of the needy, we can count on his friendship.
+**Intercession is prayer's true glory.** Prayer strengthens our own life, but its higher use is the royal work of drawing heaven's blessing onto others. Abraham, Moses, Samuel and Elijah showed their power with God in praying for others. When we come as friends of the poor and perishing, we can count on God's friendship.
 
-**Friendship depends on how we live.** We remain God's children even when we wander, but we are his friends when we do what he commands. Prayer asked only for our own comfort does not prevail. Prayer from someone who has already started the work of love for others will be heard.
+**Friendship depends on how we live.** A child remains a child even when he wanders, but friendship rests on conduct: "Ye are my friends, if ye do whatsoever I command you." Abraham was called God's friend because his faith worked in obedience. Prayer asked only for our own comfort does not prevail. Neither does waiting until God makes us so rich that helping costs nothing. The one who has already taken up a needy friend's cause, in his poverty, trusting his heavenly Friend, will be heard.
 
-**Delay is training.** God sometimes holds back an answer he fully intends to give. In this school of persevering prayer, faith is tested, purified and strengthened, and his friends learn the power they can wield in heaven.
+**Delay is training.** God sometimes holds back an answer he fully intends to give. In this school of persevering prayer our love for people and our trust in God are tested. Faith is purified like gold and learns what power it holds in heaven.
 
-Hold fast the threefold cord: the hungry friend, the praying friend and the mighty Friend who loves to give.
+**Take courage.** Parents, teachers, visitors, preachers and every worker burdened for souls should not lose heart. Hold the threefold cord: the hungry friend in need, the praying friend who asks, and the mighty Friend who loves to give.
